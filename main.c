@@ -1,7 +1,8 @@
 #include <stddef.h>
 #include <stdlib.h>
-#include <ncurses.h>
 #include "field.h"
+#include <ncurses.h>
+#include <string.h>
 
     void
 print_instr (void)
@@ -9,6 +10,17 @@ print_instr (void)
     attron (COLOR_PAIR (11));
     printw ("'h', 'j', 'k', 'l' to move. \n'r' to Reveal.\n'f' to Flag.\n'q' to quit.\n");
     attroff (COLOR_PAIR (11));
+}
+
+    void
+print_help (void)
+{
+    printf ("Usage: minesweeper [OPTION] [Rows Columns Mines]\n");
+    printf ("\tMinesweeper made with ncurses and terminal colors.\n");
+    printf ("Example: minesweeper 20 20 60\n");
+    printf ("Options:\n");
+    printf ("\tRows Columns Mines,\t\tDefaults to 16x16 with 40 mines.\n");
+    printf ("\t-h, --help\t\t\tShows this super helpful information.\n");
 }
 
     int
@@ -20,6 +32,11 @@ main (int argc, char *argv[])
 
     if (argc > 1)
     {
+        if (strcmp (argv[1], "-h") || strcmp (argv[1], "--help"))
+        {
+            print_help ();
+            return EXIT_SUCCESS;
+        }
         rows = atoi (argv[1]);
         cols = atoi (argv[2]);
         bombs = atoi (argv[3]);
