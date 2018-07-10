@@ -130,14 +130,18 @@ Play:
         print_field (&visible);
         if (!alive)
             {
+                print_failed (&visible, &field);
                 attron (COLOR_PAIR (11));
+                move (2 + rows, 0);
                 printw ("YOU LOSE!\n'q' to quit.\nAny key to play again.\n");
                 running = false;
                 attroff (COLOR_PAIR (11));
             }
         else if (won)
             {
+                print_failed (&visible, &field);
                 attron (COLOR_PAIR (11));
+                move (2 + rows, 0);
                 printw ("YOU WIN!\n'q' to quit.\nAny key to play again.\n");
                 running = false;
                 attroff (COLOR_PAIR (11));

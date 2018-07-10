@@ -108,7 +108,7 @@ print_field (field_t *f)
     assert (f != NULL);
     attron (COLOR_PAIR (11));
     printw ("Rows: %d x Cols: %d\n", (int) f->rows, (int) f->cols);
-    printw ("Flags: %d, Bombs: %d\n", f->flags, f->bombs);
+    printw ("Flags: %d, Mines: %d\n", f->flags, f->bombs);
     attroff (COLOR_PAIR (11));
 
     int i, j;
@@ -118,31 +118,29 @@ print_field (field_t *f)
         {
             coord_t c = {i, j};
             int v = getat (c, f);
-            if (v == BOMB)
-                {
+            switch (v)
+            {
+                case BOMB:
                     attron(COLOR_PAIR (8)); // Red-2
                     printw (" B");
-                }
-            else if (v == 0)
-                {
+                    break;
+                case 0:
                     attron (COLOR_PAIR ((i + j)%2 + 1)); // White
                     printw ("  ");
-                }
-            else if (v == EMPTY)
-                {
+                    break;
+                case EMPTY:
                     attron (COLOR_PAIR ((i + j)%2 + 5)); // Green
                     printw ("  ");
-                }
-            else if (v == FLAG)
-                {
+                    break;
+                case FLAG:
                     attron (COLOR_PAIR (7)); // Red
                     printw (" F");
-                }
-            else 
-                {
+                    break;
+                default:
                     attron (COLOR_PAIR ((i + j)%2 + 5)); // Green
                     printw (" %d", v);
-                }
+                    break;
+            }
             attroff (COLOR_PAIR (1));
         }
         printw ("\n");
@@ -155,31 +153,28 @@ print_cursor (coord_t c, field_t *f)
     //printw ("Cursor Row: %d, Col: %d\n", c.r, c.c);
     move (c.r + 2, c.c * 2); 
     int v = getat (c, f);
-    if (v == BOMB)
-        {
+    switch (v)
+    {
+        case BOMB:
             attron(COLOR_PAIR (7)); // Red
             printw (" B");
-        }
-    else if (v == 0)
-        {
+        case 0:
             attron (COLOR_PAIR (3)); // Blue
             printw ("  ");
-        }
-    else if (v == EMPTY)
-        {
+            break;
+        case EMPTY:
             attron (COLOR_PAIR (9)); // Magenta
             printw ("  ");
-        }
-    else if (v == FLAG)
-        {
+            break;
+        case FLAG:
             attron (COLOR_PAIR (8)); // Red
             printw (" F");
-        }
-    else
-        {
+            break;
+        default:
             attron (COLOR_PAIR (10)); // Magenta
             printw (" %d", v);
-        }
+            break;
+    }
     attroff (COLOR_PAIR (1));
 }
 
@@ -224,12 +219,13 @@ setflag (coord_t c, field_t *f)
 {
     assert (f != NULL);
     assert (in_bounds (c, f));
-    if (getat (c, f) == FLAG)
+    int v = getat (c, f);
+    if (v == FLAG)
         {
             f->flags --;
             setat (c, 0, f);
         }
-    else
+    else if (v == 0)
         {
             f->flags++;
             setat (c, FLAG, f);
@@ -257,4 +253,50 @@ winner (field_t *v, field_t *h)
         }
     }
     return true;
+}
+
+    void
+print_failed (field_t *v, field_t *h)
+{
+    assert (v != NULL);
+    assert (h != NULL);
+    assert (v->cols == h->cols);
+    assert (v->rows == h->rows);
+    assert (v->bombs == h->bombs);
+    clear ();
+    print_field (v);
+    int i, j;
+    for (i = 0; i < v->cols; ++i)
+    {
+        for (j = 0; j < v->rows; ++j)
+        {
+            coord_t c = {i, j};
+            move (c.r + 2, c.c * 2);
+            int vis = getat (c, v);
+            int hid = getat (c, h);
+            switch (hid)
+            {
+                case BOMB:
+                    if (vis == FLAG)
+                        {
+                            attron (COLOR_PAIR (4));
+                            printw (" F");
+                        }
+                    else if (vis == 0)
+                        {
+                            attron (COLOR_PAIR (10));
+                            printw (" B");
+                        }
+                    break;
+                default:
+                    if (vis == FLAG)
+                        {
+                            attron (COLOR_PAIR (7));
+                            printw ("xF");
+                        } 
+                    break;
+            }
+            attroff (COLOR_PAIR (1));
+        }
+    }
 }
