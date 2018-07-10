@@ -8,7 +8,7 @@
 print_instr (void)
 {
     attron (COLOR_PAIR (11));
-    printw ("'h', 'j', 'k', 'l' to move. \n'r' to Reveal.\n'f' to Flag.\n'q' to quit.\n");
+    printw ("'h', 'j', 'k', 'l' to move. \n'r' or <space> to Reveal.\n'f' to Flag.\n'q' to quit.\n");
     attroff (COLOR_PAIR (11));
 }
 
@@ -86,12 +86,14 @@ Play:
     print_field (&visible);
     print_instr ();
     print_cursor (cursor, &visible);
+    refresh ();
 
     /* Wait for Input. */
     bool running = true;
     bool alive = true;
     bool won = false;
     int ch;
+    ch = getchar ();
     while (running)
     {
         coord_t old_cursor = cursor;
@@ -110,6 +112,7 @@ Play:
                 cursor.c++;
                 break;
             case 'r':
+            case ' ':
                 alive = reveal (cursor, &visible, &field);
                 break;
             case 'f':
